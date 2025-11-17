@@ -1,78 +1,67 @@
-# **LineFormatter**
+from fractions import Fraction
 
-A lightweight command-line tool for generating and simplifying the equation of a line from a point and a gradient (slope).
-Useful for math homework and speeding up coordinate geometry problems.
+def simplify_equation(x1, y1, gradient):
+    # Slope-intercept form: y = mx + c
+    c = y1 - gradient * x1
+    
+    # Simplify slope and intercept (e.g., 0.5 → 1/2, -0 → 0)
+    m_frac = Fraction(gradient).limit_denominator()
+    c_frac = Fraction(c).limit_denominator()
+    
+    # Build slope-intercept equation (handle signs neatly)
+    slope_intercept = []
+    slope_intercept.append(f"y = {m_frac}x" if m_frac != 1 else "y = x")
+    
+    if c_frac != 0:
+        if c_frac > 0:
+            slope_intercept.append(f" + {c_frac}")
+        else:
+            slope_intercept.append(f" - {-c_frac}")
+    slope_intercept_eq = "".join(slope_intercept)
+    
+    # Standard form: Ax + By = C (convert from y = mx + c → mx - y = -c)
+    A = m_frac.numerator
+    B = -m_frac.denominator
+    C = -c_frac.numerator * m_frac.denominator
+    
+    # Simplify fractions (e.g., 2x - 4y = 8 → x - 2y = 4)
+    gcd_val = gcd(gcd(abs(A), abs(B)), abs(C))
+    A_simplified = A // gcd_val
+    B_simplified = B // gcd_val
+    C_simplified = C // gcd_val
+    
+    # Ensure A ≥ 0
+    if A_simplified < 0:
+        A_simplified *= -1
+        B_simplified *= -1
+        C_simplified *= -1
+    
+    # Build standard form equation
+    standard_eq_parts = []
+    if A_simplified != 0:
+        standard_eq_parts.append(f"{A_simplified}x" if A_simplified != 1 else "x")
+    if B_simplified != 0:
+        if B_simplified > 0:
+            standard_eq_parts.append(f" + {B_simplified}y" if B_simplified != 1 else " + y")
+        else:
+            standard_eq_parts.append(f" - {-B_simplified}y" if B_simplified != -1 else " - y")
+    standard_eq_parts.append(f" = {C_simplified}")
+    standard_eq = "".join(standard_eq_parts).replace("+ -", "- ")
+    
+    return slope_intercept_eq, standard_eq
 
----
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
 
-## ✨ Features
+# Example usage
+x1 = float(input("Enter x1: "))
+y1 = float(input("Enter y1: "))
+gradient = float(input("Enter the gradient (m): "))
 
-* Converts point-slope info *(x₁, y₁, m)* into:
+slope_intercept, standard = simplify_equation(x1, y1, gradient)
 
-  * **Slope-intercept form**: `y = mx + c`
-  * **Standard form**: `Ax + By = C`
-* Automatically simplifies:
-
-  * Fractions
-  * Signs (no ugly `+ -4`)
-  * Negative intercepts
-  * Common divisors (e.g. `2x - 4y = 8 → x - 2y = 4`)
-* Handles cases like:
-
-  * Fraction slopes (e.g. `0.5 → 1/2`)
-  * Zero intercept
-  * Negative gradients
-* Clean output formatting
-
----
-
-## 🧠 Example usage
-
-Run:
-
-```bash
-python LineFormatter.py
-```
-
-Input:
-
-```
-Enter x1: 3
-Enter y1: -2
-Enter the gradient (m): 0.5
-```
-
-Output:
-
-```
-Equation of the line:
-Slope-intercept form: y = 1/2x - 7/2
-Standard form: x - 2y = 7
-```
-
----
-
-## 📦 Requirements
-
-* Python 3.x
-* Uses only standard library (`fractions`)
-
----
-
-## 🧠 Why I made it
-
-Rearranging line equations manually and simplifying fractions repeatedly was getting repetitive and annoying while doing homework, so I wrote a script to do the formatting for me automatically.
-
----
-
-## 🚀 Future ideas
-
-* Vertical line handling (`x = constant`)
-* Support for two-point input
-* Option to output LaTeX format for school reports
-
----
-
-## 🤝 Contributions
-PRs welcome. Suggestions for improvement or edge-case testing appreciated.
-
+print("\nEquation of the line:")
+print(f"Slope-intercept form: {slope_intercept}")
+print(f"Standard form: {standard}")
